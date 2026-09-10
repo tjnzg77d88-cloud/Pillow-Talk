@@ -372,7 +372,7 @@
     level: 1,
     queues: {1: [], 2: [], 3: [], 4: []},
     current: null,
-    flipped: false
+    animating: false
   };
 
   var byLevel = {1: [], 2: [], 3: [], 4: []};
@@ -459,6 +459,7 @@
 
   function setLevel(level) {
     state.level = level;
+    state.animating = false;
     setLevelBtnActive(level);
     blurbEl.style.opacity = 0;
     setTimeout(function() {
@@ -477,13 +478,24 @@
   }
 
   function draw() {
+    if (state.animating) return;
+    state.animating = true;
     var level = state.level;
+
     rotationSteps += 1;
     cardEl.style.transform = 'rotateY(' + (rotationSteps * 180) + 'deg)';
+
     setTimeout(function() {
       state.current = nextCard(level);
       paintFront(state.current);
-    }, 300);
+
+      rotationSteps += 1;
+      cardEl.style.transform = 'rotateY(' + (rotationSteps * 180) + 'deg)';
+
+      setTimeout(function() {
+        state.animating = false;
+      }, 550);
+    }, 550);
   }
 
   cardEl.addEventListener('click', draw);
