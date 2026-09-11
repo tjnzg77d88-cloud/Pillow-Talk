@@ -482,23 +482,31 @@
     state.animating = true;
     var level = state.level;
 
-    rotationSteps += 1;
-    cardEl.style.transform = 'rotateY(' + (rotationSteps * 180) + 'deg)';
-
-    setTimeout(function() {
+    function revealNewFront() {
       state.current = nextCard(level);
       paintFront(state.current);
-
       rotationSteps += 1;
       cardEl.style.transform = 'rotateY(' + (rotationSteps * 180) + 'deg)';
-
       setTimeout(function() {
         state.animating = false;
       }, 550);
-    }, 550);
+    }
+
+    if (rotationSteps % 2 === 0) {
+      rotationSteps += 1;
+      cardEl.style.transform = 'rotateY(' + (rotationSteps * 180) + 'deg)';
+      setTimeout(revealNewFront, 550);
+    } else {
+      revealNewFront();
+    }
   }
 
-  cardEl.addEventListener('click', draw);
+  function peek() {
+    rotationSteps += 1;
+    cardEl.style.transform = 'rotateY(' + (rotationSteps * 180) + 'deg)';
+  }
+
+  cardEl.addEventListener('click', peek);
   drawBtn.addEventListener('click', draw);
 
   function renderList(level) {
