@@ -575,7 +575,7 @@
   document.getElementById('shuffleBtn').addEventListener('click', shuffleAny);
 
   // ---- Favourites, price test, form links, share ----
-  var FORM_URL = 'TALLY_URL_HERE';
+  var FORM_URL = 'https://tally.so/r/9NNPKG';
   var PRICE_GROUPS = [{digital: 8, physical: 22}, {digital: 12, physical: 36}];
   function load(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
   function save(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
@@ -601,13 +601,22 @@
     save('pt_favs', JSON.stringify(favs));
     syncHeart();
   });
+  var seen = [];
+  try { seen = JSON.parse(load('pt_seen') || '[]'); } catch (e) { seen = []; }
+  var deepest = parseInt(load('pt_deepest'), 10) || 0;
+  function track(card) {
+    if (seen.indexOf(card.id) === -1) { seen.push(card.id); save('pt_seen', JSON.stringify(seen)); }
+    if (card.level > deepest) { deepest = card.level; save('pt_deepest', String(deepest)); }
+  }
   var _paint = paintFront;
-  paintFront = function(card) { _paint(card); syncHeart(); };
+  paintFront = function(card) { _paint(card); syncHeart(); track(card); };
+  if (state.current) track(state.current);
   syncHeart();
 
   function formLink() {
     var q = 'favourites=' + encodeURIComponent(favs.slice().sort(function(a,b){return a-b;}).join(',') || 'none') +
-            '&price_digital=' + prices.digital + '&price_physical=' + prices.physical;
+            '&price_digital=' + prices.digital + '&price_physical=' + prices.physical +
+            '&cards_seen=' + seen.length + '&deepest_level=' + deepest;
     return FORM_URL + (FORM_URL.indexOf('?') === -1 ? '?' : '&') + q;
   }
   ['preorderBtn', 'fbBtn'].forEach(function(id) {
